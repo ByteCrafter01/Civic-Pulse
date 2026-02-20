@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: civicpulse
+      POSTGRES_USER: civic
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-civicpulse123}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U civic"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  server:
+    build: ./server
+    ports:
+      - "5000:5000"
+    environment:
+      DATABASE_URL: postgresql://civic:${DB_PASSWORD:-civicpulse123}@postgres:5432/civicpulse
+      REDIS_URL: redis://redis:6379
+      AI_SERVICE_URL: http://ai-service:8000
+      JWT_SECRET: ${JWT_SECRET:-supersecretjwt}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-supersecretrefresh}
+      PORT: 5000
+      NODE_ENV: development
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./server/uploads:/app/uploads
+    restart: unless-stopped
+
+  ai-service:
+    build: ./ai-service
+    ports:
+      - "8000:8000"
+    environment:
+      MODEL_CACHE_DIR: /app/models
+      PYTHONUNBUFFERED: "1"
+    volumes:
+      - modelcache:/app/models
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+    restart: unless-stopped
+
+  client:
+    build: ./client
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_URL: http://localhost:5000
+      VITE_SOCKET_URL: http://localhost:5000
+    depends_on:
+      - server
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  redisdata:
+  modelcache:

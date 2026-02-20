@@ -1,0 +1,27 @@
+# Top-level .gitignore for CivicPulse v2
+
+# Node
+node_modules/
+dist/
+build/
+.env
+*.log
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+ai-service/models/*.pkl
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Uploads
+server/uploads/*
+!server/uploads/.gitkeep
+
+# Docker volumes
+postgres_data/
+redis_data/

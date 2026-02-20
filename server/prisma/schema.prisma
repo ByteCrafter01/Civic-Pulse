@@ -1,0 +1,178 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CITIZEN
+  OFFICER
+  ADMIN
+}
+
+enum Status {
+  SUBMITTED
+  TRIAGED
+  ASSIGNED
+  IN_PROGRESS
+  VERIFICATION
+  RESOLVED
+  CLOSED
+  REOPENED
+  MERGED
+  ESCALATED
+}
+
+enum Priority {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+}
+
+model User {
+  id           String       @id @default(uuid())
+  name         String
+  email        String       @unique
+  password     String
+  phone        String?
+  role         Role         @default(CITIZEN)
+  departmentId String?
+  department   Department?  @relation(fields: [departmentId], references: [id])
+  complaints   Complaint[]  @relation("CitizenComplaints")
+  assigned     Complaint[]  @relation("OfficerAssigned")
+  logs         ComplaintLog[]
+  feedbacks    AIFeedback[]
+  isActive     Boolean      @default(true)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@index([role])
+  @@index([departmentId])
+}
+
+model Department {
+  id          String     @id @default(uuid())
+  name        String     @unique
+  description String?
+  officers    User[]
+  categories  Category[]
+  createdAt   DateTime   @default(now())
+}
+
+model Category {
+  id           String     @id @default(uuid())
+  name         String     @unique
+  description  String?
+  weight       Float      @default(1.0)
+  departmentId String
+  department   Department @relation(fields: [departmentId], references: [id])
+  slaConfigId  String?
+  slaConfig    SLAConfig? @relation(fields: [slaConfigId], references: [id])
+  complaints   Complaint[]
+  createdAt    DateTime   @default(now())
+
+  @@index([departmentId])
+}
+
+model SLAConfig {
+  id              String     @id @default(uuid())
+  name            String
+  resolutionHours Int
+  warningHours    Int
+  escalationHours Int
+  categories      Category[]
+  createdAt       DateTime   @default(now())
+}
+
+model Complaint {
+  id               String         @id @default(uuid())
+  title            String
+  description      String
+  imageUrl         String?
+  latitude         Float
+  longitude        Float
+
+  status           Status         @default(SUBMITTED)
+  previousStatus   Status?
+
+  priorityScore    Float?
+  priorityLevel    Priority?
+  sentimentLabel   String?
+  sentimentScore   Float?
+  urgencyKeywords  String[]
+
+  isDuplicate      Boolean        @default(false)
+  duplicateOfId    String?
+  duplicateOf      Complaint?     @relation("Duplicates", fields: [duplicateOfId], references: [id])
+  duplicates       Complaint[]    @relation("Duplicates")
+  similarityScore  Float?
+
+  aiExplanation    Json?
+  suggestedDeptId  String?
+  routingConfidence Float?
+
+  categoryId       String
+  category         Category       @relation(fields: [categoryId], references: [id])
+  citizenId        String
+  citizen          User           @relation("CitizenComplaints", fields: [citizenId], references: [id])
+  officerId        String?
+  officer          User?          @relation("OfficerAssigned", fields: [officerId], references: [id])
+
+  slaDeadline      DateTime?
+  slaWarningAt     DateTime?
+  slaBreached      Boolean        @default(false)
+  slaBreachedAt    DateTime?
+  resolvedAt       DateTime?
+
+  logs             ComplaintLog[]
+  feedbacks        AIFeedback[]
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  @@index([status])
+  @@index([priorityScore])
+  @@index([citizenId])
+  @@index([officerId])
+  @@index([categoryId])
+  @@index([latitude, longitude])
+  @@index([createdAt])
+  @@index([slaDeadline])
+}
+
+model ComplaintLog {
+  id          String    @id @default(uuid())
+  complaintId String
+  complaint   Complaint @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+  actorId     String
+  actor       User      @relation(fields: [actorId], references: [id])
+  fromStatus  Status
+  toStatus    Status
+  note        String?
+  metadata    Json?
+  createdAt   DateTime  @default(now())
+
+  @@index([complaintId])
+  @@index([createdAt])
+}
+
+model AIFeedback {
+  id                String    @id @default(uuid())
+  complaintId       String
+  complaint         Complaint @relation(fields: [complaintId], references: [id])
+  officerId         String
+  officer           User      @relation(fields: [officerId], references: [id])
+  originalScore     Float
+  correctedScore    Float
+  correctedPriority Priority?
+  reason            String?
+  createdAt         DateTime  @default(now())
+
+  @@index([complaintId])
+}
