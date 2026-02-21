@@ -3,9 +3,12 @@ const IORedis = require('ioredis');
 const config = require('./env');
 const logger = require('../utils/logger');
 
+const redisEnabled = !!config.redisUrl;
+
 let redisConnection;
 
 const getRedisConnection = () => {
+    if (!redisEnabled) return null;
     if (!redisConnection) {
         redisConnection = new IORedis(config.redisUrl, {
             maxRetriesPerRequest: null, // Required for BullMQ
@@ -31,7 +34,11 @@ const QUEUES = {
 
 const queues = {};
 
+// No-op queue stub when Redis is disabled
+const noopQueue = { add: async () => null };
+
 const getQueue = (name) => {
+    if (!redisEnabled) return noopQueue;
     if (!queues[name]) {
         queues[name] = new Queue(name, {
             connection: getRedisConnection(),
@@ -46,4 +53,4 @@ const getQueue = (name) => {
     return queues[name];
 };
 
-module.exports = { getRedisConnection, getQueue, QUEUES };
+module.exports = { getRedisConnection, getQueue, QUEUES, redisEnabled };

@@ -47,6 +47,7 @@ app.use('/api/admin', require('./routes/admin.routes'));
 app.use('/api/dashboard', require('./routes/dashboard.routes'));
 app.use('/api/feedback', require('./routes/feedback.routes'));
 app.use('/api/public', require('./routes/public.routes'));
+app.use('/api/ai', require('./routes/ai.routes'));
 
 // Health check
 app.get('/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
@@ -67,8 +68,9 @@ const io = new Server(server, {
 
 registerSocketHandlers(io);
 
-// ── Start Workers (conditional — skip in test env) ─────────────────────────
-if (config.nodeEnv !== 'test') {
+// ── Start Workers (conditional — skip in test env or when Redis is disabled) ─
+const { redisEnabled } = require('./config/redis');
+if (config.nodeEnv !== 'test' && redisEnabled) {
     try {
         const { startScoringWorker, startDuplicateWorker, startSLAWorker, startNotificationWorker } = require('./jobs/scoring.job');
         const { startSLACheckWorker } = require('./jobs/slaCheck.job');
@@ -83,6 +85,8 @@ if (config.nodeEnv !== 'test') {
     } catch (err) {
         logger.warn('BullMQ workers could not start (Redis may be unavailable)', { err: err.message });
     }
+} else if (!redisEnabled) {
+    logger.info('Redis disabled — BullMQ workers skipped');
 }
 
 // ── Listen ─────────────────────────────────────────────────────────────────

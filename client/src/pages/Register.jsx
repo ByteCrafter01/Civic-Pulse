@@ -25,24 +25,19 @@ export default function Register() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4 bg-civic-dark">
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary-600/10 rounded-full blur-3xl" />
-                <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl" />
-            </div>
-
-            <div className="w-full max-w-md relative z-10">
+        <div className="min-h-screen flex items-center justify-center p-4 bg-slate-50">
+            <div className="w-full max-w-md">
                 <div className="text-center mb-8 animate-slide-up">
-                    <div className="text-5xl mb-4">🏙️</div>
-                    <h1 className="text-3xl font-bold gradient-text">CivicPulse</h1>
-                    <p className="text-slate-400 mt-2 text-sm">Create your account</p>
+                    <div className="inline-flex items-center justify-center w-14 h-14 rounded-lg bg-primary-600 text-white text-xl font-bold mb-4">CP</div>
+                    <h1 className="text-2xl font-bold text-slate-900">CivicPulse</h1>
+                    <p className="text-slate-500 mt-1 text-sm">Create your account</p>
                 </div>
 
                 <div className="card animate-slide-up">
-                    <h2 className="text-xl font-semibold text-slate-100 mb-6">Register</h2>
+                    <h2 className="text-lg font-semibold text-slate-900 mb-6">Register</h2>
 
                     {error && (
-                        <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+                        <div className="mb-4 p-3 rounded-md bg-red-50 border border-red-200 text-red-700 text-sm">
                             {error}
                         </div>
                     )}
@@ -51,13 +46,13 @@ export default function Register() {
                         <div>
                             <label className="label">Full Name</label>
                             <input {...register('name', { required: 'Name is required' })} className="input" placeholder="John Doe" />
-                            {errors.name && <p className="text-red-400 text-xs mt-1">{errors.name.message}</p>}
+                            {errors.name && <p className="text-red-600 text-xs mt-1">{errors.name.message}</p>}
                         </div>
 
                         <div>
                             <label className="label">Email</label>
                             <input {...register('email', { required: 'Email is required' })} type="email" className="input" placeholder="your@email.com" />
-                            {errors.email && <p className="text-red-400 text-xs mt-1">{errors.email.message}</p>}
+                            {errors.email && <p className="text-red-600 text-xs mt-1">{errors.email.message}</p>}
                         </div>
 
                         <div>
@@ -71,7 +66,7 @@ export default function Register() {
                                 className="input"
                                 placeholder="Min 8 chars, 1 uppercase, 1 number"
                             />
-                            {errors.password && <p className="text-red-400 text-xs mt-1">{errors.password.message}</p>}
+                            {errors.password && <p className="text-red-600 text-xs mt-1">{errors.password.message}</p>}
                         </div>
 
                         <div>
@@ -80,13 +75,13 @@ export default function Register() {
                         </div>
 
                         <button type="submit" disabled={loading} className="btn-primary w-full mt-4">
-                            {loading ? 'Creating account…' : 'Create Account'}
+                            {loading ? 'Creating account...' : 'Create Account'}
                         </button>
                     </form>
 
                     <p className="text-center text-sm text-slate-500 mt-5">
                         Already have an account?{' '}
-                        <Link to="/login" className="text-primary-400 hover:text-primary-300 font-medium">Sign In</Link>
+                        <Link to="/login" className="text-primary-600 hover:text-primary-700 font-medium">Sign In</Link>
                     </p>
                 </div>
             </div>

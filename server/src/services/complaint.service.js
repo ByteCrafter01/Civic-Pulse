@@ -1,7 +1,8 @@
 const { PrismaClient } = require('@prisma/client');
 const { validateTransition } = require('./workflow.service');
 const { scoreToPriority, paginate } = require('../utils/helpers');
-const { getQueue, QUEUES } = require('../config/redis');
+const { getQueue, QUEUES, redisEnabled } = require('../config/redis');
+const { scoreComplaint, groqEnabled } = require('./ai.service');
 const logger = require('../utils/logger');
 
 const prisma = new PrismaClient();
@@ -23,17 +24,44 @@ const create = async ({ title, description, categoryId, latitude, longitude, cit
     });
     if (!category) throw { statusCode: 404, isOperational: true, message: 'Category not found' };
 
-    const complaint = await prisma.complaint.create({
+    let complaint = await prisma.complaint.create({
         data: { title, description, categoryId, latitude, longitude, citizenId, imageUrl },
         include: COMPLAINT_INCLUDE,
     });
 
-    // Queue AI scoring + duplicate check asynchronously
-    await Promise.all([
-        getQueue(QUEUES.AI_SCORING).add('score', { complaintId: complaint.id }),
-        getQueue(QUEUES.AI_DUPLICATE).add('check', { complaintId: complaint.id }),
-        getQueue(QUEUES.AI_ROUTING).add('route', { complaintId: complaint.id }),
-    ]);
+    // If Groq AI is available, score inline (no Redis needed)
+    if (groqEnabled) {
+        try {
+            const aiResult = await scoreComplaint({
+                title, description,
+                categoryName: category.name,
+                categoryWeight: category.slaConfig?.weight || 1,
+                latitude, longitude,
+            });
+            complaint = await prisma.complaint.update({
+                where: { id: complaint.id },
+                data: {
+                    priorityScore: aiResult.priority_score || 50,
+                    priorityLevel: aiResult.priority_level || 'MEDIUM',
+                    sentimentLabel: aiResult.sentiment_label || 'NEUTRAL',
+                    sentimentScore: aiResult.sentiment_score || 0,
+                    urgencyKeywords: aiResult.urgency_keywords || [],
+                    aiExplanation: aiResult.explanation || {},
+                },
+                include: COMPLAINT_INCLUDE,
+            });
+            logger.info('AI scored inline', { id: complaint.id, score: aiResult.priority_score });
+        } catch (err) {
+            logger.warn('Inline AI scoring failed, complaint saved without score', { error: err.message });
+        }
+    } else if (redisEnabled) {
+        // Fallback: queue via BullMQ
+        await Promise.all([
+            getQueue(QUEUES.AI_SCORING).add('score', { complaintId: complaint.id }),
+            getQueue(QUEUES.AI_DUPLICATE).add('check', { complaintId: complaint.id }),
+            getQueue(QUEUES.AI_ROUTING).add('route', { complaintId: complaint.id }),
+        ]);
+    }
 
     logger.info('Complaint created', { id: complaint.id, citizenId });
     return complaint;

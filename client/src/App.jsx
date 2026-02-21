@@ -22,6 +22,7 @@ import PublicDashboard from './pages/public/Dashboard';
 // Route guards
 import ProtectedRoute from './components/layout/ProtectedRoute';
 import LoadingSpinner from './components/shared/LoadingSpinner';
+import AIChatWidget from './components/shared/AIChatWidget';
 
 function RootRedirect() {
     const { user, loading } = useAuth();
@@ -33,48 +34,47 @@ function RootRedirect() {
 }
 
 export default function App() {
+    const { user } = useAuth();
+
     return (
+        <>
         <Routes>
-            {/* Root */}
             <Route path="/" element={<RootRedirect />} />
             <Route path="/public" element={<PublicDashboard />} />
 
-            {/* Auth */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
 
-            {/* Citizen */}
             <Route path="/citizen/dashboard" element={<ProtectedRoute roles={['CITIZEN']}><CitizenDashboard /></ProtectedRoute>} />
             <Route path="/citizen/submit" element={<ProtectedRoute roles={['CITIZEN']}><SubmitComplaint /></ProtectedRoute>} />
             <Route path="/citizen/complaints/:id" element={<ProtectedRoute roles={['CITIZEN']}><ComplaintDetail /></ProtectedRoute>} />
 
-            {/* Officer */}
             <Route path="/officer/dashboard" element={<ProtectedRoute roles={['OFFICER']}><OfficerDashboard /></ProtectedRoute>} />
             <Route path="/officer/complaints/:id" element={<ProtectedRoute roles={['OFFICER']}><ComplaintDetail /></ProtectedRoute>} />
 
-            {/* Admin */}
             <Route path="/admin/panel" element={<ProtectedRoute roles={['ADMIN']}><AdminPanel /></ProtectedRoute>} />
 
-            {/* 404 */}
             <Route path="/unauthorized" element={
-                <div className="min-h-screen bg-civic-dark flex items-center justify-center text-center">
+                <div className="min-h-screen bg-slate-50 flex items-center justify-center text-center">
                     <div>
-                        <div className="text-5xl mb-4">🚫</div>
-                        <h1 className="text-2xl font-bold text-slate-200 mb-2">Access Denied</h1>
+                        <h1 className="text-6xl font-bold text-slate-300 mb-4">403</h1>
+                        <h2 className="text-xl font-semibold text-slate-700 mb-2">Access Denied</h2>
                         <p className="text-slate-500">You don't have permission to view this page.</p>
                         <a href="/" className="btn-primary inline-block mt-6 text-sm">Go Home</a>
                     </div>
                 </div>
             } />
             <Route path="*" element={
-                <div className="min-h-screen bg-civic-dark flex items-center justify-center text-center">
+                <div className="min-h-screen bg-slate-50 flex items-center justify-center text-center">
                     <div>
-                        <div className="text-5xl mb-4">404</div>
-                        <h1 className="text-2xl font-bold text-slate-200 mb-2">Page Not Found</h1>
+                        <h1 className="text-6xl font-bold text-slate-300 mb-4">404</h1>
+                        <h2 className="text-xl font-semibold text-slate-700 mb-2">Page Not Found</h2>
                         <a href="/" className="btn-primary inline-block mt-6 text-sm">Go Home</a>
                     </div>
                 </div>
             } />
         </Routes>
+        {user && <AIChatWidget />}
+        </>
     );
 }

@@ -27,26 +27,19 @@ export default function Login() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4 bg-civic-dark">
-            {/* Background decoration */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary-600/10 rounded-full blur-3xl" />
-                <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl" />
-            </div>
-
-            <div className="w-full max-w-md relative z-10">
-                {/* Header */}
+        <div className="min-h-screen flex items-center justify-center p-4 bg-slate-50">
+            <div className="w-full max-w-md">
                 <div className="text-center mb-8 animate-slide-up">
-                    <div className="text-5xl mb-4">🏙️</div>
-                    <h1 className="text-3xl font-bold gradient-text">CivicPulse</h1>
-                    <p className="text-slate-400 mt-2 text-sm">Intelligent Municipal Complaint Management</p>
+                    <div className="inline-flex items-center justify-center w-14 h-14 rounded-lg bg-primary-600 text-white text-xl font-bold mb-4">CP</div>
+                    <h1 className="text-2xl font-bold text-slate-900">CivicPulse</h1>
+                    <p className="text-slate-500 mt-1 text-sm">Municipal Complaint Management System</p>
                 </div>
 
                 <div className="card animate-slide-up">
-                    <h2 className="text-xl font-semibold text-slate-100 mb-6">Sign In</h2>
+                    <h2 className="text-lg font-semibold text-slate-900 mb-6">Sign in to your account</h2>
 
                     {error && (
-                        <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+                        <div className="mb-4 p-3 rounded-md bg-red-50 border border-red-200 text-red-700 text-sm">
                             {error}
                         </div>
                     )}
@@ -60,7 +53,7 @@ export default function Login() {
                                 className="input"
                                 placeholder="your@email.com"
                             />
-                            {errors.email && <p className="text-red-400 text-xs mt-1">{errors.email.message}</p>}
+                            {errors.email && <p className="text-red-600 text-xs mt-1">{errors.email.message}</p>}
                         </div>
 
                         <div>
@@ -69,27 +62,26 @@ export default function Login() {
                                 {...register('password', { required: 'Password is required' })}
                                 type="password"
                                 className="input"
-                                placeholder="••••••••"
+                                placeholder="Enter your password"
                             />
-                            {errors.password && <p className="text-red-400 text-xs mt-1">{errors.password.message}</p>}
+                            {errors.password && <p className="text-red-600 text-xs mt-1">{errors.password.message}</p>}
                         </div>
 
                         <button type="submit" disabled={loading} className="btn-primary w-full mt-6">
-                            {loading ? 'Signing in…' : 'Sign In'}
+                            {loading ? 'Signing in...' : 'Sign In'}
                         </button>
                     </form>
 
                     <p className="text-center text-sm text-slate-500 mt-5">
                         Don't have an account?{' '}
-                        <Link to="/register" className="text-primary-400 hover:text-primary-300 font-medium">
+                        <Link to="/register" className="text-primary-600 hover:text-primary-700 font-medium">
                             Register
                         </Link>
                     </p>
 
-                    {/* Test credentials hint */}
-                    <div className="mt-4 p-3 rounded-xl bg-slate-800/50 border border-slate-700 text-xs text-slate-500">
-                        <p className="font-medium text-slate-400 mb-1">Demo credentials:</p>
-                        <p>Admin:   admin@civicpulse.com / Admin@123</p>
+                    <div className="mt-4 p-3 rounded-md bg-slate-50 border border-slate-200 text-xs text-slate-500">
+                        <p className="font-medium text-slate-600 mb-1">Demo credentials:</p>
+                        <p>Admin: admin@civicpulse.com / Admin@123</p>
                         <p>Officer: officer@civicpulse.com / Officer@123</p>
                         <p>Citizen: citizen@civicpulse.com / Citizen@123</p>
                     </div>

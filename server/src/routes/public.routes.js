@@ -24,18 +24,31 @@ router.get('/heatmap', async (req, res, next) => {
 // GET /api/public/track/:id — track complaint by ID (no login)
 router.get('/track/:id', async (req, res, next) => {
     try {
-        const complaint = await prisma.complaint.findUnique({
-            where: { id: req.params.id },
-            select: {
-                id: true, title: true, status: true, priorityLevel: true,
-                createdAt: true, updatedAt: true, slaDeadline: true, slaBreached: true,
-                category: { select: { name: true } },
-                logs: {
-                    select: { fromStatus: true, toStatus: true, note: true, createdAt: true },
-                    orderBy: { createdAt: 'asc' },
-                },
+        const searchId = req.params.id.trim();
+        const selectFields = {
+            id: true, title: true, status: true, priorityLevel: true,
+            createdAt: true, updatedAt: true, slaDeadline: true, slaBreached: true,
+            category: { select: { name: true } },
+            logs: {
+                select: { fromStatus: true, toStatus: true, note: true, createdAt: true },
+                orderBy: { createdAt: 'asc' },
             },
+        };
+
+        // Try exact match first
+        let complaint = await prisma.complaint.findUnique({
+            where: { id: searchId },
+            select: selectFields,
         });
+
+        // If not found, try partial match (starts with)
+        if (!complaint) {
+            complaint = await prisma.complaint.findFirst({
+                where: { id: { startsWith: searchId } },
+                select: selectFields,
+            });
+        }
+
         if (!complaint) return res.status(404).json({ success: false, message: 'Complaint not found' });
         apiResponse(res, 200, complaint);
     } catch (err) { next(err); }
