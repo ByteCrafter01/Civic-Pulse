@@ -49,9 +49,11 @@ model User {
   assigned     Complaint[]  @relation("OfficerAssigned")
   logs         ComplaintLog[]
   feedbacks    AIFeedback[]
-  isActive     Boolean      @default(true)
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
+  surveys      SatisfactionSurvey[] @relation("CitizenSurveys")
+  isActive            Boolean      @default(true)
+  emailNotifications  Boolean      @default(true)
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
 
   @@index([role])
   @@index([departmentId])
@@ -133,6 +135,7 @@ model Complaint {
 
   logs             ComplaintLog[]
   feedbacks        AIFeedback[]
+  survey           SatisfactionSurvey?
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
 
@@ -175,4 +178,20 @@ model AIFeedback {
   createdAt         DateTime  @default(now())
 
   @@index([complaintId])
+}
+
+model SatisfactionSurvey {
+  id            String    @id @default(uuid())
+  complaintId   String    @unique
+  complaint     Complaint @relation(fields: [complaintId], references: [id])
+  citizenId     String
+  citizen       User      @relation("CitizenSurveys", fields: [citizenId], references: [id])
+  rating        Int       // 1-5 overall satisfaction
+  responseTime  Int?      // 1-5 perceived response speed
+  communication Int?      // 1-5 communication quality
+  resolution    Int?      // 1-5 resolution quality
+  comment       String?
+  createdAt     DateTime  @default(now())
+
+  @@index([citizenId])
 }

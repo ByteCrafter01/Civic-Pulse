@@ -89,9 +89,18 @@ def score(
 
     # ── Sentiment ──────────────────────────────────────────────────────────
     sentiment_result = _get_sentiment_pipeline()(cleaned[:512])[0]
-    sentiment_label  = sentiment_result["label"]          # POSITIVE / NEGATIVE
+    raw_label        = sentiment_result["label"]
     raw_confidence   = sentiment_result["score"]
-    sentiment_score  = -raw_confidence if sentiment_label == "NEGATIVE" else raw_confidence
+
+    # Handle both binary (POSITIVE/NEGATIVE) and star-based (1-5 star) models
+    if "star" in raw_label.lower() or raw_label.isdigit():
+        # Multilingual model: converts 1-5 stars to -1 to 1 scale
+        stars = int(raw_label.replace(" star", "").replace(" stars", "").strip())
+        sentiment_score = (stars - 3) / 2.0  # 1→-1, 2→-0.5, 3→0, 4→0.5, 5→1
+        sentiment_label = "NEGATIVE" if stars <= 2 else ("POSITIVE" if stars >= 4 else "NEUTRAL")
+    else:
+        sentiment_label = raw_label
+        sentiment_score = -raw_confidence if sentiment_label == "NEGATIVE" else raw_confidence
 
     # ── Urgency Keywords ───────────────────────────────────────────────────
     urgency_kws   = extract_urgency_keywords(cleaned, settings.urgency_keywords)

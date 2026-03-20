@@ -2,6 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { LogIn, Mail, Lock } from 'lucide-react';
 
 export default function Login() {
     const { login } = useAuth();
@@ -27,63 +28,95 @@ export default function Login() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4 bg-slate-50">
-            <div className="w-full max-w-md">
-                <div className="text-center mb-8 animate-slide-up">
-                    <div className="inline-flex items-center justify-center w-14 h-14 rounded-lg bg-primary-600 text-white text-xl font-bold mb-4">CP</div>
-                    <h1 className="text-2xl font-bold text-slate-900">CivicPulse</h1>
-                    <p className="text-slate-500 mt-1 text-sm">Municipal Complaint Management System</p>
+        <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/30 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900">
+            {/* Background orbs */}
+            <div className="fixed inset-0 overflow-hidden pointer-events-none">
+                <div className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full bg-blue-400/10 dark:bg-blue-400/5 blur-3xl" />
+                <div className="absolute -bottom-40 -left-40 w-[400px] h-[400px] rounded-full bg-indigo-400/10 dark:bg-indigo-400/5 blur-3xl" />
+            </div>
+
+            <div className="w-full max-w-md relative">
+                <div className="text-center mb-8">
+                    <Link to="/landing" className="inline-flex items-center gap-2.5 mb-6">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white flex items-center justify-center text-lg font-bold shadow-xl shadow-blue-600/25">CP</div>
+                    </Link>
+                    <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Welcome back</h1>
+                    <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">Sign in to CivicPulse</p>
                 </div>
 
-                <div className="card animate-slide-up">
-                    <h2 className="text-lg font-semibold text-slate-900 mb-6">Sign in to your account</h2>
-
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-8 shadow-xl shadow-slate-200/50 dark:shadow-slate-950/50">
                     {error && (
-                        <div className="mb-4 p-3 rounded-md bg-red-50 border border-red-200 text-red-700 text-sm">
+                        <div className="mb-4 p-3 rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 text-sm">
                             {error}
                         </div>
                     )}
 
-                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
                         <div>
                             <label className="label">Email</label>
-                            <input
-                                {...register('email', { required: 'Email is required' })}
-                                type="email"
-                                className="input"
-                                placeholder="your@email.com"
-                            />
-                            {errors.email && <p className="text-red-600 text-xs mt-1">{errors.email.message}</p>}
+                            <div className="relative">
+                                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                <input
+                                    {...register('email', { required: 'Email is required' })}
+                                    type="email"
+                                    className="input pl-10"
+                                    placeholder="your@email.com"
+                                />
+                            </div>
+                            {errors.email && <p className="text-red-600 dark:text-red-400 text-xs mt-1">{errors.email.message}</p>}
                         </div>
 
                         <div>
                             <label className="label">Password</label>
-                            <input
-                                {...register('password', { required: 'Password is required' })}
-                                type="password"
-                                className="input"
-                                placeholder="Enter your password"
-                            />
-                            {errors.password && <p className="text-red-600 text-xs mt-1">{errors.password.message}</p>}
+                            <div className="relative">
+                                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                <input
+                                    {...register('password', { required: 'Password is required' })}
+                                    type="password"
+                                    className="input pl-10"
+                                    placeholder="Enter your password"
+                                />
+                            </div>
+                            {errors.password && <p className="text-red-600 dark:text-red-400 text-xs mt-1">{errors.password.message}</p>}
                         </div>
 
-                        <button type="submit" disabled={loading} className="btn-primary w-full mt-6">
-                            {loading ? 'Signing in...' : 'Sign In'}
+                        <button type="submit" disabled={loading} className="btn-primary w-full flex items-center justify-center gap-2 py-3">
+                            {loading ? (
+                                <span className="flex items-center gap-2">
+                                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+                                    Signing in...
+                                </span>
+                            ) : (
+                                <>
+                                    <LogIn className="w-4 h-4" />
+                                    Sign In
+                                </>
+                            )}
                         </button>
                     </form>
 
-                    <p className="text-center text-sm text-slate-500 mt-5">
+                    <p className="text-center text-sm text-slate-500 dark:text-slate-400 mt-6">
                         Don't have an account?{' '}
-                        <Link to="/register" className="text-primary-600 hover:text-primary-700 font-medium">
+                        <Link to="/register" className="text-blue-600 hover:text-blue-700 dark:text-blue-400 font-semibold">
                             Register
                         </Link>
                     </p>
+                </div>
 
-                    <div className="mt-4 p-3 rounded-md bg-slate-50 border border-slate-200 text-xs text-slate-500">
-                        <p className="font-medium text-slate-600 mb-1">Demo credentials:</p>
-                        <p>Admin: admin@civicpulse.com / Admin@123</p>
-                        <p>Officer: officer@civicpulse.com / Officer@123</p>
-                        <p>Citizen: citizen@civicpulse.com / Citizen@123</p>
+                <div className="mt-4 p-4 rounded-xl bg-white/50 dark:bg-slate-900/50 border border-slate-200/50 dark:border-slate-800/50 backdrop-blur-sm text-xs text-slate-500 dark:text-slate-400">
+                    <p className="font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Demo credentials</p>
+                    <div className="grid grid-cols-3 gap-2">
+                        {[
+                            { role: 'Admin', email: 'admin@civicpulse.com', pass: 'Admin@123' },
+                            { role: 'Officer', email: 'officer@civicpulse.com', pass: 'Officer@123' },
+                            { role: 'Citizen', email: 'citizen@civicpulse.com', pass: 'Citizen@123' },
+                        ].map((cred) => (
+                            <div key={cred.role} className="p-2 rounded-lg bg-slate-50 dark:bg-slate-800 text-center">
+                                <p className="font-semibold text-slate-700 dark:text-slate-300">{cred.role}</p>
+                                <p className="text-[10px] text-slate-400 mt-0.5 truncate">{cred.email}</p>
+                                <p className="text-[10px] text-slate-400">{cred.pass}</p>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </div>

@@ -115,4 +115,87 @@ const getPublicStats = async () => {
     };
 };
 
-module.exports = { getDashboardStats, getByDepartment, getByCategory, getTrends, getHeatmapData, getPublicStats };
+/**
+ * Weekly sentiment trends with optional department breakdown
+ */
+const getSentimentTrends = async () => {
+    const weeks = 12;
+    const results = [];
+
+    for (let i = weeks - 1; i >= 0; i--) {
+        const start = new Date();
+        start.setDate(start.getDate() - (i + 1) * 7);
+        const end = new Date();
+        end.setDate(end.getDate() - i * 7);
+
+        const complaints = await prisma.complaint.findMany({
+            where: {
+                createdAt: { gte: start, lt: end },
+                sentimentScore: { not: null },
+            },
+            select: {
+                sentimentScore: true,
+                category: { select: { department: { select: { name: true } } } },
+            },
+        });
+
+        const avgSentiment = complaints.length > 0
+            ? parseFloat((complaints.reduce((s, c) => s + c.sentimentScore, 0) / complaints.length).toFixed(3))
+            : 0;
+
+        // Department breakdown
+        const deptSentiment = {};
+        complaints.forEach((c) => {
+            const dept = c.category?.department?.name || 'Unknown';
+            if (!deptSentiment[dept]) deptSentiment[dept] = { sum: 0, count: 0 };
+            deptSentiment[dept].sum += c.sentimentScore;
+            deptSentiment[dept].count++;
+        });
+
+        results.push({
+            week: `W${weeks - i}`,
+            start: start.toISOString().split('T')[0],
+            avgSentiment,
+            count: complaints.length,
+            departments: Object.fromEntries(
+                Object.entries(deptSentiment).map(([name, d]) => [name, parseFloat((d.sum / d.count).toFixed(3))])
+            ),
+        });
+    }
+
+    return results;
+};
+
+/**
+ * Area-based sentiment (grid cells for heatmap overlay)
+ */
+const getAreaSentiment = async () => {
+    const complaints = await prisma.complaint.findMany({
+        where: { sentimentScore: { not: null } },
+        select: { latitude: true, longitude: true, sentimentScore: true },
+    });
+
+    // Group by 0.01 degree grid cells (~1km)
+    const gridSize = 0.01;
+    const cells = {};
+    complaints.forEach((c) => {
+        const key = `${(Math.floor(c.latitude / gridSize) * gridSize).toFixed(2)},${(Math.floor(c.longitude / gridSize) * gridSize).toFixed(2)}`;
+        if (!cells[key]) cells[key] = { lat: 0, lng: 0, scores: [], count: 0 };
+        cells[key].lat += c.latitude;
+        cells[key].lng += c.longitude;
+        cells[key].scores.push(c.sentimentScore);
+        cells[key].count++;
+    });
+
+    return Object.values(cells).map((cell) => ({
+        lat: parseFloat((cell.lat / cell.count).toFixed(4)),
+        lng: parseFloat((cell.lng / cell.count).toFixed(4)),
+        avgSentiment: parseFloat((cell.scores.reduce((s, v) => s + v, 0) / cell.scores.length).toFixed(3)),
+        count: cell.count,
+    }));
+};
+
+module.exports = {
+    getDashboardStats, getByDepartment, getByCategory, getTrends,
+    getHeatmapData, getPublicStats, getSentimentTrends, getAreaSentiment,
+};

@@ -60,6 +60,20 @@ class RoutingRequest(BaseModel):
 class BatchScoreRequest(BaseModel):
     complaints: List[ScoreRequest]
 
+class EvaluateItem(BaseModel):
+    title:            str
+    description:      str
+    category_name:    str  = "General"
+    category_weight:  float = 1.0
+    lat:              float = 0.0
+    lng:              float = 0.0
+    has_image:        bool  = False
+    true_priority:    str   = "MEDIUM"  # Known label for evaluation
+    true_score:       Optional[float] = None
+
+class EvaluateRequest(BaseModel):
+    complaints: List[EvaluateItem]
+
 # ── Routes ────────────────────────────────────────────────────────────────
 
 @app.post("/score", response_model=ScoreResponse, tags=["Scoring"])
@@ -121,6 +135,59 @@ async def batch_score(req: BatchScoreRequest):
         except Exception as e:
             results.append({"error": str(e)})
     return {"results": results}
+
+
+@app.post("/evaluate", tags=["Evaluation"])
+async def evaluate_model(req: EvaluateRequest):
+    """Evaluate the scoring model against complaints with known labels.
+    Returns precision, recall, F1 per priority class and overall MAE."""
+    from app.models.scorer import score
+    from collections import Counter
+
+    predictions = []
+    true_labels = []
+    score_errors = []
+
+    for c in req.complaints:
+        try:
+            result = score(c.title, c.description, c.category_name, c.category_weight, c.lat, c.lng, c.has_image)
+            predictions.append(result["priority_level"])
+            true_labels.append(c.true_priority)
+            if c.true_score is not None:
+                score_errors.append(abs(result["priority_score"] - c.true_score))
+        except Exception:
+            continue
+
+    if not predictions:
+        return {"error": "No complaints could be scored"}
+
+    levels = ["CRITICAL", "HIGH", "MEDIUM", "LOW"]
+    per_class = {}
+    for level in levels:
+        tp = sum(1 for p, t in zip(predictions, true_labels) if p == level and t == level)
+        fp = sum(1 for p, t in zip(predictions, true_labels) if p == level and t != level)
+        fn = sum(1 for p, t in zip(predictions, true_labels) if p != level and t == level)
+        precision = tp / (tp + fp) if (tp + fp) > 0 else 0
+        recall = tp / (tp + fn) if (tp + fn) > 0 else 0
+        f1 = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0
+        per_class[level] = {
+            "precision": round(precision, 4),
+            "recall": round(recall, 4),
+            "f1": round(f1, 4),
+            "support": sum(1 for t in true_labels if t == level),
+        }
+
+    overall_accuracy = sum(1 for p, t in zip(predictions, true_labels) if p == t) / len(predictions)
+    mae = round(sum(score_errors) / len(score_errors), 2) if score_errors else None
+
+    return {
+        "total_evaluated": len(predictions),
+        "overall_accuracy": round(overall_accuracy, 4),
+        "mae": mae,
+        "per_class": per_class,
+        "prediction_distribution": dict(Counter(predictions)),
+        "true_distribution": dict(Counter(true_labels)),
+    }
 
 
 @app.get("/health", tags=["System"])

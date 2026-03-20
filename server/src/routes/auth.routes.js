@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const authService = require('../services/auth.service');
+const emailService = require('../services/email.service');
 const { validate, schemas } = require('../middleware/validate');
 const { authenticate } = require('../middleware/auth');
 const { authLimiter } = require('../middleware/rateLimiter');
@@ -8,6 +9,8 @@ const { apiResponse } = require('../utils/helpers');
 router.post('/register', authLimiter, validate(schemas.register), async (req, res, next) => {
     try {
         const result = await authService.register(req.body);
+        // Send welcome email (non-blocking)
+        emailService.sendWelcomeEmail({ to: req.body.email, name: req.body.name }).catch(() => {});
         apiResponse(res, 201, result, 'Registration successful');
     } catch (err) { next(err); }
 });

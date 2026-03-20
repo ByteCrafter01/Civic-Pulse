@@ -16,6 +16,8 @@ if (groqEnabled) {
 
 const groqScore = async ({ title, description, categoryName }) => {
     const prompt = `You are a municipal complaint triage AI. Analyze this civic complaint and return a JSON object.
+The complaint may be in English or Hindi — process it in whichever language it is written in.
+If the complaint is in Hindi, provide the reasoning field in Hindi as well.
 
 Complaint Title: ${title}
 Description: ${description}

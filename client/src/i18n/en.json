@@ -1,0 +1,128 @@
+{
+    "app": {
+        "name": "CivicPulse",
+        "tagline": "Intelligent Municipal Complaint Management"
+    },
+    "nav": {
+        "myComplaints": "My Complaints",
+        "submitComplaint": "Submit Complaint",
+        "queue": "Queue",
+        "dashboard": "Dashboard",
+        "aiEvaluation": "AI Evaluation",
+        "publicPortal": "Public Portal",
+        "signOut": "Sign out"
+    },
+    "auth": {
+        "login": "Login",
+        "register": "Register",
+        "email": "Email",
+        "password": "Password",
+        "name": "Full Name",
+        "phone": "Phone (optional)",
+        "loginBtn": "Sign In",
+        "registerBtn": "Create Account",
+        "noAccount": "Don't have an account?",
+        "hasAccount": "Already have an account?"
+    },
+    "complaint": {
+        "title": "Title",
+        "titlePlaceholder": "Brief description of the issue",
+        "category": "Category",
+        "selectCategory": "Select a category",
+        "description": "Description",
+        "descriptionPlaceholder": "Please describe the issue in detail. Include location landmarks, severity, and any safety concerns.",
+        "location": "Location",
+        "useMyLocation": "Use my location",
+        "photo": "Photo (optional, max 5MB)",
+        "submit": "Submit Complaint",
+        "submitting": "Submitting...",
+        "cancel": "Cancel",
+        "success": "Complaint submitted successfully!",
+        "aiSuggest": "AI Suggest",
+        "aiAnalyzing": "AI analyzing...",
+        "complaintId": "Complaint ID",
+        "copy": "Copy",
+        "saveIdNote": "Save this ID to track your complaint on the public portal.",
+        "goToDashboard": "Go to Dashboard",
+        "whatHappensNext": "What happens next?",
+        "step1": "Your complaint is received and assigned a unique tracking ID",
+        "step2": "AI analyzes priority, sentiment, and urgency in real-time",
+        "step3": "An officer is assigned based on category and workload",
+        "step4": "You receive real-time status updates via your dashboard",
+        "step5": "Verify resolution before the complaint is closed"
+    },
+    "status": {
+        "SUBMITTED": "Submitted",
+        "TRIAGED": "Triaged",
+        "ASSIGNED": "Assigned",
+        "IN_PROGRESS": "In Progress",
+        "VERIFICATION": "Verification",
+        "RESOLVED": "Resolved",
+        "CLOSED": "Closed",
+        "REOPENED": "Reopened",
+        "ESCALATED": "Escalated",
+        "MERGED": "Merged"
+    },
+    "priority": {
+        "CRITICAL": "Critical",
+        "HIGH": "High",
+        "MEDIUM": "Medium",
+        "LOW": "Low"
+    },
+    "dashboard": {
+        "title": "Admin Control Panel",
+        "subtitle": "System overview, assignments, and SLA management",
+        "overview": "Overview",
+        "assignments": "Assignments",
+        "sla": "SLA",
+        "categories": "Categories",
+        "sentiment": "Sentiment",
+        "total": "Total",
+        "pending": "Pending",
+        "inProgress": "In Progress",
+        "resolved": "Resolved",
+        "slaBreach": "SLA Breach",
+        "weeklyVolume": "Weekly Volume",
+        "byDepartment": "By Department",
+        "categoryDistribution": "Category Distribution",
+        "downloadMonthly": "Download Monthly Report",
+        "downloadAIReport": "Download AI Report"
+    },
+    "survey": {
+        "title": "Rate Your Experience",
+        "subtitle": "Help us improve by sharing your experience with this complaint resolution.",
+        "overallSatisfaction": "Overall Satisfaction",
+        "responseTime": "Response Time",
+        "communication": "Communication",
+        "resolutionQuality": "Resolution Quality",
+        "comments": "Comments (optional)",
+        "commentsPlaceholder": "Any additional feedback...",
+        "submitFeedback": "Submit Feedback",
+        "skip": "Skip",
+        "rateExperience": "Rate Your Experience",
+        "thankYou": "Thank you for your feedback!"
+    },
+    "detail": {
+        "back": "Back",
+        "downloadReceipt": "Download Receipt",
+        "reopenComplaint": "Reopen Complaint",
+        "aiScoreBreakdown": "AI Score Breakdown",
+        "statusTimeline": "Status Timeline",
+        "noChanges": "No status changes yet",
+        "slaBreached": "SLA breached \u2014 this complaint has been escalated",
+        "slaDeadline": "SLA deadline"
+    },
+    "public": {
+        "title": "Public Transparency Dashboard",
+        "subtitle": "Real-time civic complaint statistics",
+        "trackComplaint": "Track a Complaint",
+        "enterTrackingId": "Enter complaint tracking ID...",
+        "track": "Track"
+    },
+    "common": {
+        "loading": "Loading...",
+        "error": "Something went wrong",
+        "noData": "No data available",
+        "processing": "Processing..."
+    }
+}

@@ -4,6 +4,7 @@ import api from '../../api/axios';
 import Navbar from '../../components/layout/Navbar';
 import PriorityBadge from '../../components/complaint/PriorityBadge';
 import LoadingSpinner from '../../components/shared/LoadingSpinner';
+import SurveyModal from '../../components/shared/SurveyModal';
 
 const STATUS_CFG = {
     SUBMITTED: 'text-slate-600', TRIAGED: 'text-blue-600',
@@ -19,10 +20,21 @@ export default function ComplaintDetail() {
     const [complaint, setComplaint] = useState(null);
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
+    const [showSurvey, setShowSurvey] = useState(false);
+    const [surveyExists, setSurveyExists] = useState(false);
 
     useEffect(() => {
         api.get(`/complaints/${id}`)
-            .then(({ data }) => setComplaint(data.data))
+            .then(({ data }) => {
+                setComplaint(data.data);
+                // Check if survey exists for resolved complaints
+                if (['RESOLVED', 'CLOSED', 'VERIFICATION'].includes(data.data.status)) {
+                    api.get(`/surveys/check/${id}`).then(({ data: s }) => {
+                        setSurveyExists(s.data.exists);
+                        if (!s.data.exists) setShowSurvey(true);
+                    }).catch(() => {});
+                }
+            })
             .catch(() => navigate('/citizen/dashboard'))
             .finally(() => setLoading(false));
     }, [id]);
@@ -95,10 +107,39 @@ export default function ComplaintDetail() {
                         </div>
                     )}
 
+                    <button
+                        onClick={async () => {
+                            const { data } = await api.get(`/reports/complaint/${id}/receipt`, { responseType: 'blob' });
+                            const url = window.URL.createObjectURL(new Blob([data]));
+                            const link = document.createElement('a');
+                            link.href = url;
+                            link.download = `complaint-${id.slice(0, 8)}-receipt.pdf`;
+                            link.click();
+                            window.URL.revokeObjectURL(url);
+                        }}
+                        className="btn-secondary mt-4 text-sm"
+                    >
+                        Download Receipt
+                    </button>
+
                     {canReopen && (
                         <button onClick={handleReopen} disabled={submitting} className="btn-danger mt-4 text-sm">
                             {submitting ? 'Processing...' : 'Reopen Complaint'}
                         </button>
+                    )}
+
+                    {['RESOLVED', 'CLOSED', 'VERIFICATION'].includes(complaint.status) && !surveyExists && (
+                        <button
+                            onClick={() => setShowSurvey(true)}
+                            className="btn-primary mt-4 text-sm"
+                        >
+                            Rate Your Experience
+                        </button>
+                    )}
+                    {surveyExists && (
+                        <div className="mt-4 p-3 rounded-md bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 text-sm">
+                            Thank you for your feedback!
+                        </div>
                     )}
                 </div>
 
@@ -128,6 +169,14 @@ export default function ComplaintDetail() {
                         </div>
                     )}
                 </div>
+
+                {showSurvey && !surveyExists && (
+                    <SurveyModal
+                        complaintId={id}
+                        onClose={() => setShowSurvey(false)}
+                        onSubmitted={() => { setShowSurvey(false); setSurveyExists(true); }}
+                    />
+                )}
             </main>
         </div>
     );

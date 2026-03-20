@@ -48,6 +48,9 @@ app.use('/api/dashboard', require('./routes/dashboard.routes'));
 app.use('/api/feedback', require('./routes/feedback.routes'));
 app.use('/api/public', require('./routes/public.routes'));
 app.use('/api/ai', require('./routes/ai.routes'));
+app.use('/api/reports', require('./routes/report.routes'));
+app.use('/api/surveys', require('./routes/survey.routes'));
+app.use('/api/ai-evaluation', require('./routes/ai-evaluation.routes'));
 
 // Health check
 app.get('/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));

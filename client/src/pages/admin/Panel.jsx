@@ -8,6 +8,9 @@ import {
     BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
     PieChart, Pie, Cell, LineChart, Line, CartesianGrid,
 } from 'recharts';
+import SentimentTrends from '../../components/analytics/SentimentTrends';
+import SentimentHeatmap from '../../components/analytics/SentimentHeatmap';
+import AIInsights from '../../components/analytics/AIInsights';
 
 const COLORS = ['#2563eb', '#7c3aed', '#db2777', '#d97706', '#059669'];
 
@@ -54,7 +57,7 @@ export default function AdminPanel() {
 
     if (loading) return <LoadingSpinner fullScreen />;
 
-    const tabs = ['overview', 'assignments', 'sla', 'categories'];
+    const tabs = ['overview', 'assignments', 'sla', 'categories', 'sentiment'];
 
     return (
         <div className="bg-civic-dark min-h-screen">
@@ -80,6 +83,36 @@ export default function AdminPanel() {
 
                 {tab === 'overview' && (
                     <div className="space-y-6 animate-fade-in">
+                        <div className="flex gap-3 justify-end">
+                            <button
+                                onClick={async () => {
+                                    const { data } = await api.get('/reports/monthly', { responseType: 'blob' });
+                                    const url = window.URL.createObjectURL(new Blob([data]));
+                                    const link = document.createElement('a');
+                                    link.href = url;
+                                    link.download = 'civicpulse-monthly-report.pdf';
+                                    link.click();
+                                    window.URL.revokeObjectURL(url);
+                                }}
+                                className="btn-secondary text-sm"
+                            >
+                                Download Monthly Report
+                            </button>
+                            <button
+                                onClick={async () => {
+                                    const { data } = await api.get('/reports/ai-evaluation', { responseType: 'blob' });
+                                    const url = window.URL.createObjectURL(new Blob([data]));
+                                    const link = document.createElement('a');
+                                    link.href = url;
+                                    link.download = 'ai-evaluation-report.pdf';
+                                    link.click();
+                                    window.URL.revokeObjectURL(url);
+                                }}
+                                className="btn-secondary text-sm"
+                            >
+                                Download AI Report
+                            </button>
+                        </div>
                         {stats && (
                             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                                 <StatsCard title="Total" value={stats.total} />
@@ -219,6 +252,15 @@ export default function AdminPanel() {
                                     </div>
                                 </div>
                             ))}
+                        </div>
+                    </div>
+                )}
+                {tab === 'sentiment' && (
+                    <div className="space-y-6 animate-fade-in">
+                        <AIInsights />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <SentimentTrends />
+                            <SentimentHeatmap />
                         </div>
                     </div>
                 )}

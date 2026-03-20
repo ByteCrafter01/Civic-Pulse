@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api/axios';
 import Navbar from '../../components/layout/Navbar';
+import MapPicker from '../../components/shared/MapPicker';
 
 export default function SubmitComplaint() {
     const navigate = useNavigate();
@@ -183,27 +184,10 @@ export default function SubmitComplaint() {
 
                         <div>
                             <label className="label">Location *</label>
-                            <div className="p-4 rounded-md bg-slate-50 border border-slate-200 text-sm text-slate-600">
-                                <p>Lat: {locationPicked.lat.toFixed(4)} | Lng: {locationPicked.lng.toFixed(4)}</p>
-                                <div className="flex gap-2 mt-3">
-                                    <input
-                                        type="number"
-                                        step="0.0001"
-                                        value={locationPicked.lat}
-                                        onChange={(e) => setLocationPicked((l) => ({ ...l, lat: parseFloat(e.target.value) }))}
-                                        className="input text-xs py-2"
-                                        placeholder="Latitude"
-                                    />
-                                    <input
-                                        type="number"
-                                        step="0.0001"
-                                        value={locationPicked.lng}
-                                        onChange={(e) => setLocationPicked((l) => ({ ...l, lng: parseFloat(e.target.value) }))}
-                                        className="input text-xs py-2"
-                                        placeholder="Longitude"
-                                    />
-                                </div>
-                            </div>
+                            <MapPicker
+                                position={locationPicked}
+                                onLocationChange={setLocationPicked}
+                            />
                         </div>
 
                         <div>

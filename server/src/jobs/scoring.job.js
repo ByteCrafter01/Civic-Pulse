@@ -131,6 +131,8 @@ const startNotificationWorker = () => {
         async (job) => {
             if (job.name === 'status-change') {
                 await notificationService.notifyStatusChange(job.data);
+            } else if (job.name === 'sla-warning') {
+                await notificationService.notifySLAWarning(job.data);
             }
         },
         { connection: getRedisConnection(), concurrency: 10 }
