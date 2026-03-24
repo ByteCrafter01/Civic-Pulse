@@ -5,7 +5,14 @@
       "Bash(docker --version)",
       "Bash(docker compose:*)",
       "Bash(sudo ss:*)",
-      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5173)"
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5173)",
+      "Bash(xargs ls:*)",
+      "Bash(head -50 /home/nandini.rt/Documents/Civic-Pulse/server/prisma/migrations/*/migration.sql)",
+      "Bash(find /home/nandini.rt/Documents/Civic-Pulse/server/src/services -type f -name *)",
+      "Bash(find /home/nandini.rt/Documents/Civic-Pulse -type f \\\\\\(-name *.pdf -o -name requirements.txt -o -name setup.py -o -name pyproject.toml \\\\\\))",
+      "Bash(grep -r \"pandoc\\\\|pdflatex\\\\|wkhtmltopdf\" /home/nandini.rt/Documents/Civic-Pulse --include=*.json --include=*.txt --include=*.yml --include=*.yaml)",
+      "Bash(grep -r \"evaluation\\\\|eval\" /home/nandini.rt/Documents/Civic-Pulse/server/src/routes --include=*.js)",
+      "Bash(node docs/generate-pdf.js)"
     ]
   }
 }
